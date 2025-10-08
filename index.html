@@ -1,348 +1,541 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Restaurant</title>
 
-    <link rel="stylesheet" href="./style.css">
- 
+    <!-- Google Fonts (fixed + improved typography) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
+
+    <!-- Your stylesheet -->
+    <link rel="stylesheet" href="./style.css" />
+
+    <!-- Minimal utility styles to support the new JS features (kept tiny to avoid clashes) -->
+    <style>
+        :root { --brand:#ff6b35; --bg:#0a0a0a; --text:#fff; }
+        body{font-family:'Inter',system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
+        h1,h2,h3,h4{font-family:'Poppins',ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
+        /* Header helpers */
+        .header{position:sticky;top:0;z-index:1000;background:rgba(10,10,10,.8);backdrop-filter:blur(6px)}
+        .nav-container{display:grid;grid-template-columns:auto 1fr auto;gap:16px;align-items:center;padding:12px 20px}
+        .logo img{width:54px;height:54px;object-fit:contain}
+        .nav-menu{list-style:none;display:flex;gap:28px}
+        .nav-menu a{text-decoration:none;font-weight:600}
+        .nav-icons{display:flex;gap:14px;align-items:center}
+        .nav-icons img{width:22px;height:22px;cursor:pointer}
+
+        /* Mobile nav toggle (hamburger) */
+        .nav-toggle{display:none;width:42px;height:42px;border:0;background:transparent;cursor:pointer}
+        .nav-toggle .bar{display:block;width:24px;height:2px;background:#fff;margin:5px auto;transition:transform .2s}
+        /* Mobile layout */
+        @media (max-width: 900px){
+            .nav-container{grid-template-columns:auto auto auto}
+            .nav-toggle{display:inline-flex;align-items:center;justify-content:center}
+            nav.nav {position:fixed;inset:64px 0 0 auto;background:#0f0f0f;transform:translateX(100%);transition:transform .25s ease; width:min(80vw,360px);box-shadow:-6px 0 20px rgba(0,0,0,.35)}
+            nav.nav.open{transform:translateX(0)}
+            .nav-menu{flex-direction:column;padding:18px}
+            .nav-menu a{padding:12px 6px;display:block}
+            body.no-scroll{overflow:hidden}
+        }
+
+        /* Buttons */
+        .btn-primary{background:#fff;color:#000;padding:12px 22px;border-radius:999px;border:0;font-weight:700;text-decoration:none;display:inline-block}
+        .btn-primary:hover{background:var(--brand);color:#fff;transform:translateY(-1px)}
+
+        /* Hero quick fallback bg overlay (in case style.css doesn’t) */
+        .hero{position:relative}
+        .hero::before{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.45),rgba(0,0,0,.35));pointer-events:none}
+
+        /* Search drawer */
+        .search-drawer{position:fixed;left:50%;transform:translateX(-50%);top:72px;width:min(760px,94vw);background:#111;border:1px solid #222;border-radius:14px;display:none;z-index:1100}
+        .search-drawer.open{display:block}
+        .search-row{display:flex;gap:8px;padding:12px}
+        .search-row input{flex:1;background:#0d0d0d;border:1px solid #222;color:#fff;border-radius:10px;padding:12px 14px;font-size:16px}
+        .search-row button{border:0;border-radius:10px;padding:12px 16px;font-weight:600;cursor:pointer;background:var(--brand);color:#fff}
+
+        /* Toast */
+        .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#111;border:1px solid #222;color:#fff;padding:12px 16px;border-radius:12px;opacity:0;pointer-events:none;transition:opacity .2s, transform .2s;z-index:1200}
+        .toast.show{opacity:1;transform:translateX(-50%) translateY(-6px)}
+
+        /* Reveal animations */
+        .reveal{opacity:0;transform:translateY(18px);transition:opacity .6s ease, transform .6s ease}
+        .reveal.visible{opacity:1;transform:translateY(0)}
+
+        /* Back to Top */
+        #backToTop{position:fixed;right:18px;bottom:18px;width:44px;height:44px;border-radius:50%;border:0;background:#1a1a1a;color:#fff;display:none;cursor:pointer;box-shadow:0 6px 18px rgba(0,0,0,.25)}
+        #backToTop.show{display:inline-grid;place-items:center}
+    </style>
 </head>
 <body>
-    <!-- Header -->
-    <header class="header">
-        <div class="nav-container">
-            <div class="logo">
-                <img src="/images/logo.svg" alt="Logo">
+<!-- Header -->
+<header class="header" role="banner">
+    <div class="nav-container">
+        <button id="navToggle" class="nav-toggle" aria-expanded="false" aria-controls="primary-navigation" aria-label="Toggle navigation">
+            <span class="bar"></span><span class="bar"></span><span class="bar"></span>
+        </button>
 
-            </div>
-            <nav>
-                <ul class="nav-menu">
-                    <li><a href="#home">Welcome</a></li>
+        <a class="logo" href="#home" aria-label="Home">
+            <img src="/images/logo.svg" alt="Restaurant logo" />
+        </a>
+
+        <nav id="primary-navigation" class="nav" role="navigation" aria-label="Main">
+            <ul class="nav-menu">
+                <li><a href="#home">Welcome</a></li>
+                <li><a href="#menu">Our Menu</a></li>
+                <li><a href="#franchise">Franchise</a></li>
+                <li><a href="#contact">Contact</a></li>
+            </ul>
+        </nav>
+
+        <div class="nav-icons" aria-label="Quick actions">
+            <img id="openSearch" src="/images/Search Icon.svg" alt="Search" title="Search (/)">
+            <img src="/images/Group.svg" alt="Cart">
+        </div>
+    </div>
+</header>
+
+<!-- Search Drawer -->
+<div id="searchDrawer" class="search-drawer" role="dialog" aria-modal="true" aria-labelledby="searchLabel">
+    <div class="search-row">
+        <input id="searchInput" type="text" placeholder="Search menu items…" aria-label="Search menu items">
+        <button id="closeSearch" type="button" aria-label="Close search">Close</button>
+    </div>
+</div>
+
+<!-- Hero Section -->
+<section class="hero reveal" id="home" style="background:url('/images/image (6).png') center/cover no-repeat;">
+    <div class="hero-container">
+        <div class="hero-content">
+            <h1>Welcome!</h1>
+            <h2>We Make Delicious Food For You</h2>
+            <p>Lorem ipsum is simply dummy text of the printing and typesetting industry. Lorem ipsum has been the industry's standard dummy text ever since the 1500s.</p>
+            <a href="#menu" class="btn-primary">Order Online</a>
+        </div>
+    </div>
+</section>
+
+<!-- About Section -->
+<section class="about reveal">
+    <div class="about-container">
+        <div class="about-content">
+            <h2>Why We Are The Best Food Makers</h2>
+            <p>Lorem ipsum is simply dummy text of the printing and typesetting industry. Lorem ipsum has been the industry's standard dummy text ever since the 1500s.</p>
+            <p>It is a long established fact that a reader will be distracted by the readable content of a page when looking at its layout. The point of using Lorem Ipsum is that it has a more-or-less normal distribution of letters.</p>
+        </div>
+        <div class="about-image">
+            <img src="/images/Video.png" alt="Chef Cooking">
+        </div>
+    </div>
+</section>
+
+<!-- Menu Section -->
+<section class="menu reveal" id="menu">
+    <div class="menu-container">
+        <h2>Our Best &amp; Delicious Menu</h2>
+
+        <!-- Tabs (click to filter) -->
+        <div class="menu-tabs" role="tablist" aria-label="Menu categories">
+            <button class="menu-tab active" type="button" data-filter="all" aria-selected="true">All</button>
+            <button class="menu-tab" type="button" data-filter="bread">Bread</button>
+            <button class="menu-tab" type="button" data-filter="donut">Donut</button>
+            <button class="menu-tab" type="button" data-filter="rolls">Chiffon &amp; Rolls</button>
+            <button class="menu-tab" type="button" data-filter="cookies">Cookies</button>
+            <button class="menu-tab" type="button" data-filter="cakes">Cakes</button>
+        </div>
+
+        <div class="menu-grid" id="menuGrid">
+            <!-- Menu Card -->
+            <article class="menu-item" data-category="bread">
+                <img src="/images/Image.png" alt="Naan Burger">
+                <h3>Naan Burger</h3>
+                <p>Lorem ipsum is simply dummy text of the printing and typesetting industry.</p>
+                <div class="menu-inner-cart">
+                    <div class="price">$3.95</div>
+                    <button class="inner-cart" data-item="Naan Burger" aria-label="Add Naan Burger to cart">
+                        <img src="/images/shopping-cart.png" alt="">
+                    </button>
+                </div>
+            </article>
+
+            <article class="menu-item" data-category="rolls">
+                <img src="/images/image1.png" alt="Butter Chicken Fries">
+                <h3>Butter Chicken Fries</h3>
+                <p>Lorem ipsum is simply dummy text of the printing and typesetting industry.</p>
+                <div class="menu-inner-cart">
+                    <div class="price">$3.95</div>
+                    <button class="inner-cart" data-item="Butter Chicken Fries" aria-label="Add Butter Chicken Fries to cart">
+                        <img src="/images/shopping-cart.png" alt="">
+                    </button>
+                </div>
+            </article>
+
+            <article class="menu-item" data-category="bread">
+                <img src="/images/Image (2).png" alt="Chicken Sandwich">
+                <h3>Chicken Sandwich</h3>
+                <p>Lorem ipsum is simply dummy text of the printing and typesetting industry.</p>
+                <div class="menu-inner-cart">
+                    <div class="price">$3.95</div>
+                    <button class="inner-cart" data-item="Chicken Sandwich" aria-label="Add Chicken Sandwich to cart">
+                        <img src="/images/shopping-cart.png" alt="">
+                    </button>
+                </div>
+            </article>
+
+            <article class="menu-item" data-category="cookies">
+                <img src="/images/Image (3).png" alt="Cheese Chicken Sticks">
+                <h3>Cheese Chicken Sticks</h3>
+                <p>Lorem ipsum is simply dummy text of the printing and typesetting industry.</p>
+                <div class="menu-inner-cart">
+                    <div class="price">$3.95</div>
+                    <button class="inner-cart" data-item="Cheese Chicken Sticks" aria-label="Add Cheese Chicken Sticks to cart">
+                        <img src="/images/shopping-cart.png" alt="">
+                    </button>
+                </div>
+            </article>
+
+            <article class="menu-item" data-category="cakes">
+                <img src="/images/Image (4).png" alt="3 Layer Burger">
+                <h3>3 Layer Burger</h3>
+                <p>Lorem ipsum is simply dummy text of the printing and typesetting industry.</p>
+                <div class="menu-inner-cart">
+                    <div class="price">$3.95</div>
+                    <button class="inner-cart" data-item="3 Layer Burger" aria-label="Add 3 Layer Burger to cart">
+                        <img src="/images/shopping-cart.png" alt="">
+                    </button>
+                </div>
+            </article>
+
+            <article class="menu-item" data-category="donut">
+                <img src="/images/Image (5).png" alt="Sandwich">
+                <h3>Sandwich</h3>
+                <p>Lorem ipsum is simply dummy text of the printing and typesetting industry.</p>
+                <div class="menu-inner-cart">
+                    <div class="price">$3.95</div>
+                    <button class="inner-cart" data-item="Sandwich" aria-label="Add Sandwich to cart">
+                        <img src="/images/shopping-cart.png" alt="">
+                    </button>
+                </div>
+            </article>
+        </div>
+
+        <div class="see-all-btn">
+            <a href="#menu" class="btn-primary" id="seeAllBtn">See All</a>
+        </div>
+    </div>
+</section>
+
+<!-- Stats Section -->
+<section class="stats reveal">
+    <div class="stats-container">
+        <h2>We believe in making quality food</h2>
+        <div class="stats-grid">
+            <div class="stat-item"><h3>2M+</h3><p>Happy Customers</p></div>
+            <div class="stat-item"><h3>98%</h3><p>Customer Satisfaction</p></div>
+            <div class="stat-item"><h3>20+</h3><p>Our Branches</p></div>
+            <div class="stat-item"><h3>100+</h3><p>Food Employees</p></div>
+        </div>
+    </div>
+</section>
+
+<!-- Franchise Section -->
+<section class="franchise reveal" id="franchise">
+    <div class="franchise-container">
+        <h2>Start The Adventure Today And Become a Franchisee</h2>
+        <p>Lorem ipsum is simply dummy text of the printing and typesetting industry. Lorem ipsum has been the industry's standard dummy text ever since the 1500s.</p>
+        <a href="#" class="btn-primary">Become a Franchisee</a>
+    </div>
+</section>
+
+<!-- Testimonials Section -->
+<section class="testimonials reveal">
+    <div class="testimonials-container">
+        <h2>What Our Clients Are Saying</h2>
+        <div class="testimonials-grid">
+            <article class="testimonial-item">
+                <div class="testimonial-header">
+                    <img src="/images/Avater.png" alt="Client" class="testimonial-avatar">
+                    <div class="testimonial-info">
+                        <h4>Michal Gun</h4>
+                        <h5>Head of sales at Tesla</h5>
+                        <div class="testimonial-rating" aria-label="5 out of 5 stars">★★★★★</div>
+                    </div>
+                </div>
+                <p class="testimonial-text">Lorem ipsum is simply dummy text of the printing and typesetting industry.</p>
+            </article>
+
+            <article class="testimonial-item">
+                <div class="testimonial-header">
+                    <img src="/images/Avater (1).png" alt="Client" class="testimonial-avatar">
+                    <div class="testimonial-info">
+                        <h4>Aleena White</h4>
+                        <h5>Accountant of Ozone</h5>
+                        <div class="testimonial-rating" aria-label="5 out of 5 stars">★★★★★</div>
+                    </div>
+                </div>
+                <p class="testimonial-text">Lorem ipsum is simply dummy text of the printing and typesetting industry.</p>
+            </article>
+
+            <article class="testimonial-item">
+                <div class="testimonial-header">
+                    <img src="/images/Avater (2).png" alt="Client" class="testimonial-avatar">
+                    <div class="testimonial-info">
+                        <h4>Cries Lee</h4>
+                        <h5>CEO Of Montee</h5>
+                        <div class="testimonial-rating" aria-label="5 out of 5 stars">★★★★★</div>
+                    </div>
+                </div>
+                <p class="testimonial-text">Lorem ipsum is simply dummy text of the printing and typesetting industry.</p>
+            </article>
+        </div>
+    </div>
+</section>
+
+<!-- Support Section -->
+<section class="support reveal">
+    <div class="support-container">
+        <h2>For more Support</h2>
+        <form class="support-form" action="#" method="post">
+            <input type="email" placeholder="Your Email" name="email" required aria-label="Your email">
+            <button type="submit">Subscribe</button>
+        </form>
+    </div>
+</section>
+
+<!-- Location Section -->
+<section class="location reveal">
+    <div class="location-container">
+        <div class="location-content">
+            <h2>Our Restaurants. Where to Find Us?</h2>
+            <p>Lorem ipsum is simply dummy text of the printing and typesetting industry. Lorem ipsum has been the industry's standard dummy text ever since the 1500s.</p>
+            <a href="#" class="btn-primary">Find Our Nearest Location</a>
+        </div>
+        <div class="location-map">
+            <iframe
+                    title="Map to our Mirpur location"
+                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3469.700142695628!2d90.37590757511695!3d23.8074069786315!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3755c72bcac0f4d1%3A0xba32cd2ad5f4f605!2sMirpur-13%20Central%20Masjid!5e1!3m2!1sen!2sbd!4v1759072829828!5m2!1sen!2sbd"
+                    width="100%" height="360" style="border:0;" loading="lazy" allowfullscreen
+                    referrerpolicy="no-referrer-when-downgrade"></iframe>
+        </div>
+    </div>
+</section>
+
+<!-- Footer -->
+<footer class="footer reveal" id="contact" role="contentinfo">
+    <div class="footer-container">
+        <div class="footer-grid">
+            <div class="footer-column">
+                <h3>Our Products</h3>
+                <ul>
                     <li><a href="#menu">Our Menu</a></li>
-                    <li><a href="#franchise">Franchise</a></li>
-                    <li><a href="#contact">Contact</a></li>
+                    <li><a href="#menu">Our Burgers</a></li>
+                    <li><a href="#menu">Our Pizza</a></li>
+                    <li><a href="#menu">Our Sandwiches</a></li>
                 </ul>
-            </nav>
-            <div class="nav-icons">
-              <img src="/images/Group.svg" alt="cart">
-              <img src="/images/Search Icon.svg" alt="search">
+            </div>
+            <div class="footer-column">
+                <h3>Useful Information</h3>
+                <ul>
+                    <li><a href="#">Legal Notice</a></li>
+                    <li><a href="#">Privacy Policy</a></li>
+                    <li><a href="#">Terms of Service</a></li>
+                    <li><a href="#">Cookie Policy</a></li>
+                </ul>
+            </div>
+            <div class="footer-column">
+                <h3>Contact us</h3>
+                <ul>
+                    <li><a href="#">Our Locations</a></li>
+                    <li><a href="#">Get Directions</a></li>
+                    <li><a href="#">Contact Form</a></li>
+                    <li><a href="#">Customer Service</a></li>
+                </ul>
+            </div>
+            <div class="footer-column">
+                <h3>We accept</h3>
+                <img src="/images/Frame.png" alt="Payment methods accepted">
             </div>
         </div>
-    </header>
 
-    <!-- Hero Section -->
-    <section class="hero" id="home">
-        <div class="hero-container">
-            <div class="hero-content">
-                <h1>Welcome!</h1>
-                <h2>We Made Delicious Food for You</h2>
-                <p>Lorem ipsum is simply dummy text of the printing and typesetting industry. Lorem ipsum has been the industry's standard dummy text ever since the 1500s.</p>
-                <a href="#menu" class="btn-primary">Order Online</a>
+        <div class="footer-bottom">
+            <div class="social-icons" aria-label="Social links">
+                <img src="/images/Vector (1).png" alt="Facebook">
+                <img src="/images/vector2.png" alt="Twitter">
+                <img src="/images/vector3.png" alt="Instagram">
+                <img src="/images/vector4.png" alt="LinkedIn">
             </div>
-     
+            <div class="copyright">© 2024 Food — All rights reserved</div>
         </div>
-    </section>
+    </div>
+</footer>
 
-    <!-- About Section -->
-    <section class="about">
-        <div class="about-container">
-            <div class="about-content">
-                <h2>Why We are Best Food Maker</h2>
-                <p>Lorem ipsum is simply dummy text of the printing and typesetting industry. Lorem ipsum has been the industry's standard dummy text ever since the 1500s.</p>
-                <p>It is a long established fact that a reader will be distracted by the readable content of a page when looking at its layout. The point of using Lorem Ipsum is that it has a more-or-less normal distribution of letters, as opposed to using 'Content here, content here', making it look like readable English.</p>
-            </div>
-            <div class="about-image">
-                <img src="/images/Video.png" alt="Chef Cooking">
-                
-            </div>
-        </div>
-    </section>
+<!-- Back to Top -->
+<button id="backToTop" aria-label="Back to top" title="Back to top">↑</button>
 
-    <!-- Menu Section -->
-    <section class="menu" id="menu">
-        <div class="menu-container">
-            <h2>Our Best & Delicious Menu</h2>
-            <div class="menu-tabs">
-                <a href="#" class="menu-tab active">All</a>
-                <a href="#" class="menu-tab">Bread</a>
-                <a href="#" class="menu-tab">Donut</a>
-                <a href="#" class="menu-tab">Chiffon & Rolls</a>
-                <a href="#" class="menu-tab">Cookies</a>
-                <a href="#" class="menu-tab">Cakes</a>
-            </div>
-            <div class="menu-grid">
-                <div class="menu-item">
-                    <img src="/images/Image.png" alt="Nasu Burger">
-                    <h3>Naan Burger</h3>
-                    <p>Lorem ipsum is simply dummy text of the printing and typesetting industry.</p>
-                   <div class="menu-inner-cart">
-                     <div class="price">$3.95</div>
-                    <div class="inner-cart"><img src="../images/shopping-cart.png" alt="" ></div>
-                   </div>
-                </div>
+<!-- Cool JS Features -->
+<script>
+    // ===== Helpers =====
+    const $ = (sel, ctx = document) => ctx.querySelector(sel);
+    const $$ = (sel, ctx = document) => Array.from(ctx.querySelectorAll(sel));
 
+    // ===== Mobile nav toggle =====
+    const toggleBtn = $('#navToggle');
+    const nav = $('#primary-navigation');
+    toggleBtn.addEventListener('click', () => {
+        const expanded = toggleBtn.getAttribute('aria-expanded') === 'true';
+        toggleBtn.setAttribute('aria-expanded', String(!expanded));
+        nav.classList.toggle('open');
+        document.body.classList.toggle('no-scroll');
+    });
+    // Close on nav link click (mobile)
+    $$('#primary-navigation a').forEach(a => a.addEventListener('click', () => {
+        toggleBtn.setAttribute('aria-expanded', 'false');
+        nav.classList.remove('open');
+        document.body.classList.remove('no-scroll');
+    }));
+    // Close on ESC
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            toggleBtn.setAttribute('aria-expanded', 'false');
+            nav.classList.remove('open');
+            document.body.classList.remove('no-scroll');
+            closeSearchDrawer();
+        }
+    });
 
-                <div class="menu-item">
-                    <img src="/images/image1.png" alt="Butter Chicken Fries">
-                    <h3>Butter Chicken Fries</h3>
-                    <p>Lorem ipsum is simply dummy text of the printing and typesetting industry.</p>
-                                       <div class="menu-inner-cart">
-                     <div class="price">$3.95</div>
-                    <div class="inner-cart"><img src="../images/shopping-cart.png" alt="" ></div>
-                   </div>
-                </div>
+    // ===== Smooth in-page scrolling =====
+    $$('#primary-navigation a[href^="#"], .see-all-btn a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function(e){
+            const id = this.getAttribute('href');
+            const target = document.querySelector(id);
+            if (target) {
+                e.preventDefault();
+                target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        })
+    });
 
+    // ===== Tabs: filter menu items =====
+    const tabs = $$('.menu-tab');
+    const items = $$('.menu-item');
+    tabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+            tabs.forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+            const filter = tab.dataset.filter;
+            items.forEach(card => {
+                const cat = card.dataset.category;
+                const show = filter === 'all' || cat === filter;
+                card.style.display = show ? '' : 'none';
+            });
+        });
+    });
 
-                <div class="menu-item">
-                    <img src="/images/Image (2).png" alt="Chicken Sandwich">
-                    <h3>Chicken Sandwich</h3>
-                    <p>Lorem ipsum is simply dummy text of the printing and typesetting industry.</p>
-                                       <div class="menu-inner-cart">
-                     <div class="price">$3.95</div>
-                    <div class="inner-cart"><img src="../images/shopping-cart.png" alt="" ></div>
-                   </div>
-                </div>
+    // ===== Search drawer over menu =====
+    const drawer = $('#searchDrawer');
+    const searchInput = $('#searchInput');
+    const openSearch = $('#openSearch');
+    const closeSearch = $('#closeSearch');
 
+    function openSearchDrawer(){
+        drawer.classList.add('open');
+        searchInput.focus();
+    }
+    function closeSearchDrawer(){
+        drawer.classList.remove('open');
+        searchInput.value = '';
+        // reset filter result
+        items.forEach(card => card.style.display = '');
+    }
 
+    openSearch.addEventListener('click', openSearchDrawer);
+    closeSearch.addEventListener('click', closeSearchDrawer);
+    // Keyboard shortcut: "/" to open search
+    document.addEventListener('keydown', (e) => {
+        const tag = (e.target.tagName || '').toLowerCase();
+        if (e.key === '/' && tag !== 'input' && tag !== 'textarea') {
+            e.preventDefault();
+            openSearchDrawer();
+        }
+    });
 
-                <div class="menu-item">
-                    <img src="/images/Image (3).png" alt="Cheese Chicken Sticks">
-                    <h3>Cheese Chicken Sticks</h3>
-                    <p>Lorem ipsum is simply dummy text of the printing and typesetting industry.</p>
-                                     <div class="menu-inner-cart">
-                     <div class="price">$3.95</div>
-                    <div class="inner-cart"><img src="../images/shopping-cart.png" alt="" ></div>
-                   </div>
-                </div>
+    // Live filter menu items by title/desc
+    searchInput.addEventListener('input', (e) => {
+        const q = e.target.value.trim().toLowerCase();
+        items.forEach(card => {
+            const text = card.innerText.toLowerCase();
+            card.style.display = text.includes(q) ? '' : 'none';
+        });
+    });
 
+    // ===== Add-to-cart toast =====
+    const toast = document.createElement('div');
+    toast.className = 'toast';
+    document.body.appendChild(toast);
 
+    function showToast(msg){
+        toast.textContent = msg;
+        toast.classList.add('show');
+        clearTimeout(showToast._t);
+        showToast._t = setTimeout(() => toast.classList.remove('show'), 1600);
+    }
 
-                <div class="menu-item">
-                    <img src="/images/Image (4).png" alt="3 Layer Burger">
-                    <h3>3 Layer Burger</h3>
-                    <p>Lorem ipsum is simply dummy text of the printing and typesetting industry.</p>
-                                       <div class="menu-inner-cart">
-                     <div class="price">$3.95</div>
-                    <div class="inner-cart"><img src="/images/shopping-cart.png" alt="" ></div>
-                   </div>
-                </div>
+    $$('#menuGrid .inner-cart').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const name = btn.dataset.item || 'Item';
+            showToast(`${name} added to cart`);
+            // subtle pulse
+            btn.animate([{ transform:'scale(1)' }, { transform:'scale(1.08)' }, { transform:'scale(1)' }],
+                { duration: 260, easing:'ease-out' });
+        });
+    });
 
+    // ===== Reveal on scroll =====
+    const io = new IntersectionObserver((entries) => {
+        for (const entry of entries){
+            if (entry.isIntersecting) {
+                entry.target.classList.add('visible');
+                io.unobserve(entry.target);
+            }
+        }
+    }, { threshold: 0.12 });
+    $$('.reveal').forEach(el => io.observe(el));
 
+    // ===== Back to Top =====
+    const backToTop = $('#backToTop');
+    backToTop.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+    window.addEventListener('scroll', () => {
+        const y = window.scrollY || document.documentElement.scrollTop;
+        backToTop.classList.toggle('show', y > 600);
+    });
 
-                <div class="menu-item">
-                    <img src="/images/Image (5).png" alt="Sandwich">
-                    <h3>Sandwich</h3>
-                    <p>Lorem ipsum is simply dummy text of the printing and typesetting industry.</p>
-                                      <div class="menu-inner-cart">
-                     <div class="price">$3.95</div>
-                    <div class="inner-cart"><img src="/images/shopping-cart.png" alt="" ></div>
-                   </div>
-                </div>
-            </div>
-            <div class="see-all-btn">
-                <a href="#" class="btn-primary">See All</a>
-            </div>
-        </div>
-    </section>
+    // ===== Hero CTA bounce on first view =====
+    const heroBtn = document.querySelector('.hero .btn-primary');
+    if (heroBtn) {
+        setTimeout(() => {
+            heroBtn.animate([
+                { transform:'translateY(0)' },
+                { transform:'translateY(-6px)' },
+                { transform:'translateY(0)' }
+            ], { duration: 600, easing: 'ease-out' });
+        }, 900);
+    }
 
-    <!-- Stats Section -->
-    <section class="stats">
-        <div class="stats-container">
-            <h2>We believe in making quality food</h2>
-            <div class="stats-grid">
-                <div class="stat-item">
-                    <h3>2M+</h3>
-                    <p>Happy Customers</p>
-                </div>
-                <div class="stat-item">
-                    <h3>98%</h3>
-                    <p>Customer Satisfaction</p>
-                </div>
-                <div class="stat-item">
-                    <h3>20+</h3>
-                    <p>Our Branches</p>
-                </div>
-                <div class="stat-item">
-                    <h3>100+</h3>
-                    <p>Food Employees</p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Franchise Section -->
-    <section class="franchise" id="franchise">
-        <div class="franchise-container">
-            <h2>Start The Adventure Today And Become a Franchisee</h2>
-            <p>Lorem ipsum is simply dummy text of the printing and typesetting industry. Lorem ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book.</p>
-            <a href="#" class="btn-primary">Become a Franchisee</a>
-        </div>
-    </section>
-
-    <!-- Testimonials Section -->
-    <section class="testimonials">
-        <div class="testimonials-container">
-            <h2>What Our Clients Are Saying</h2>
-            <div class="testimonials-grid">
-                <div class="testimonial-item">
-                    <div class="testimonial-header">
-                        <img src="/images/Avater.png" alt="Client" class="testimonial-avatar">
-                        <div class="testimonial-info">
-                            <h4>Michal Gun</h4>
-                            <h5> Head of sales at Tesla  </h5>
-                            
-                            <div class="testimonial-rating">★★★★★</div>
-                        </div>
-                    </div>
-                    <p class="testimonial-text">Lorem ipsum is simply dummy text of the printing and typesetting industry. Lorem ipsum has been the industry's standard dummy text.</p>
-                </div>
-
-
-                <div class="testimonial-item">
-                    <div class="testimonial-header">
-                        <img src="/images/Avater (1).png" alt="Client" class="testimonial-avatar">
-                        <div class="testimonial-info">
-                            <h4>Aleena White</h4>
-                             <h5>Accountant of Ozone   </h5>
-                            <div class="testimonial-rating">★★★★★</div>
-                        </div>
-                    </div>
-                    <p class="testimonial-text">Lorem ipsum is simply dummy text of the printing and typesetting industry. Lorem ipsum has been the industry's standard dummy text.</p>
-                </div>
-
-
-                <div class="testimonial-item">
-                    <div class="testimonial-header">
-                        <img src="/images/Avater (2).png" alt="Client" class="testimonial-avatar">
-                        <div class="testimonial-info">
-                            <h4>Cries Lee</h4>
-                            <h5>CEO Of Montee</h5>
-                            <div class="testimonial-rating">★★★★★</div>
-                        </div>
-                    </div>
-                    <p class="testimonial-text">Lorem ipsum is simply dummy text of the printing and typesetting industry. Lorem ipsum has been the industry's standard dummy text.</p>
-                </div>
-
-
-                <div class="testimonial-item">
-                    <div class="testimonial-header">
-                        <img src="/images/Avater.png" alt="Client" class="testimonial-avatar">
-                        <div class="testimonial-info">
-                            <h4>Michal Gun</h4>
-                            <h5> Head of sales at Tesla  </h5>
-                            
-                            <div class="testimonial-rating">★★★★★</div>
-                        </div>
-                    </div>
-                    <p class="testimonial-text">Lorem ipsum is simply dummy text of the printing and typesetting industry. Lorem ipsum has been the industry's standard dummy text.</p>
-                </div>
-
-
-                <div class="testimonial-item">
-                    <div class="testimonial-header">
-                        <img src="/images/Avater (1).png" alt="Client" class="testimonial-avatar">
-                        <div class="testimonial-info">
-                            <h4>Aleena White</h4>
-                             <h5>Accountant of Ozone   </h5>
-                            <div class="testimonial-rating">★★★★★</div>
-                        </div>
-                    </div>
-                    <p class="testimonial-text">Lorem ipsum is simply dummy text of the printing and typesetting industry. Lorem ipsum has been the industry's standard dummy text.</p>
-                </div>
-
-
-                <div class="testimonial-item">
-                    <div class="testimonial-header">
-                        <img src="/images/Avater (2).png" alt="Client" class="testimonial-avatar">
-                        <div class="testimonial-info">
-                            <h4>Cries Lee</h4>
-                            <h5>CEO Of Montee</h5>
-                            <div class="testimonial-rating">★★★★★</div>
-                        </div>
-                    </div>
-                    <p class="testimonial-text">Lorem ipsum is simply dummy text of the printing and typesetting industry. Lorem ipsum has been the industry's standard dummy text.</p>
-                </div>
-
-
-            </div>
-        </div>
-    </section>
-
-    <!-- Support Section -->
-    <section class="support">
-        <div class="support-container">
-            <h2>For more Support</h2>
-            <form class="support-form">
-                <input type="email" placeholder="Your Email" required>
-                <button type="submit">Subscribe</button>
-            </form>
-        </div>
-    </section>
-
-    <!-- Location Section -->
-    <section class="location">
-        <div class="location-container">
-            <div class="location-content">
-                <h2>Our Restaurants. Where to Find Us?</h2>
-                <p>Lorem ipsum is simply dummy text of the printing and typesetting industry. Lorem ipsum has been the industry's standard dummy text ever since the 1500s.</p>
-                <a href="#" class="btn-primary">Find Our Nearest Location</a>
-            </div>
-            <div class="location-map">
-               <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3469.700142695628!2d90.37590757511695!3d23.8074069786315!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3755c72bcac0f4d1%3A0xba32cd2ad5f4f605!2sMirpur-13%20Central%20Masjid!5e1!3m2!1sen!2sbd!4v1759072829828!5m2!1sen!2sbd" width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></>width="400" height="250" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
-            </div>
-        </div>
-    </section>
-
-    <!-- Footer -->
-    <footer class="footer" id="contact">
-        <div class="footer-container">
-            <div class="footer-grid">
-                <div class="footer-column">
-                    <h3>Our Products</h3>
-                    <ul>
-                        <li><a href="#">Our Menu</a></li>
-                        <li><a href="#">Our Burgers</a></li>
-                        <li><a href="#">Our Pizza</a></li>
-                        <li><a href="#">Our Sandwiches</a></li>
-                    </ul>
-                </div>
-                <div class="footer-column">
-                    <h3>Useful Information</h3>
-                    <ul>
-                        <li><a href="#">Legal Notice</a></li>
-                        <li><a href="#">Privacy Policy</a></li>
-                        <li><a href="#">Terms of Service</a></li>
-                        <li><a href="#">Cookie Policy</a></li>
-                    </ul>
-                </div>
-                <div class="footer-column">
-                    <h3>Contact us</h3>
-                    <ul>
-                        <li><a href="#">Our Locations</a></li>
-                        <li><a href="#">Get Directions</a></li>
-                        <li><a href="#">Contact Form</a></li>
-                        <li><a href="#">Customer Service</a></li>
-                    </ul>
-                </div>
-                <div class="footer-column">
-                    <h3>We accept</h3>
-            <img src="/Frame - Copy.png" alt="payments">
-                </div>
-            </div>
-            <div class="footer-bottom">
-                <div class="social-icons">
-              <img src="/images/Vector (1).png" alt="social">
-              <img src="/images/vector2.png" alt="social">
-             <img src="/images/vector3.png" alt="social">
-              <img src="/images/vector4.png" alt="social">
-                </div>
-               
-                <div class="copyright">
-                    © 2024 Food All rights reserved
-                </div>
-            </div>
-        </div>
-    </footer>
+    // ===== See All button focuses grid and clears filters =====
+    const seeAllBtn = $('#seeAllBtn');
+    if (seeAllBtn){
+        seeAllBtn.addEventListener('click', (e) => {
+            const allTab = tabs.find(t => t.dataset.filter === 'all');
+            if (allTab) allTab.click();
+            // Brief highlight
+            const grid = $('#menuGrid');
+            if (grid) {
+                grid.animate([{ boxShadow:'0 0 0 rgba(0,0,0,0)' }, { boxShadow:'0 0 0 8px rgba(255,255,255,.08)' }, { boxShadow:'0 0 0 rgba(0,0,0,0)' }], { duration: 900 });
+            }
+        });
+    }
+</script>
 </body>
 </html>
