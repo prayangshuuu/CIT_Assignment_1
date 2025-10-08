@@ -5,20 +5,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Restaurant</title>
 
-    <!-- Google Fonts (fixed + improved typography) -->
+    <!-- Google Fonts (typography fixes) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
 
-    <!-- Your stylesheet -->
+    <!-- Main stylesheet -->
     <link rel="stylesheet" href="./style.css" />
 
-    <!-- Minimal utility styles to support the new JS features (kept tiny to avoid clashes) -->
+    <!-- Tiny utilities for interactivity (kept minimal) -->
     <style>
         :root { --brand:#ff6b35; --bg:#0a0a0a; --text:#fff; }
         body{font-family:'Inter',system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
         h1,h2,h3,h4{font-family:'Poppins',ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
-        /* Header helpers */
+
         .header{position:sticky;top:0;z-index:1000;background:rgba(10,10,10,.8);backdrop-filter:blur(6px)}
         .nav-container{display:grid;grid-template-columns:auto 1fr auto;gap:16px;align-items:center;padding:12px 20px}
         .logo img{width:54px;height:54px;object-fit:contain}
@@ -27,10 +27,9 @@
         .nav-icons{display:flex;gap:14px;align-items:center}
         .nav-icons img{width:22px;height:22px;cursor:pointer}
 
-        /* Mobile nav toggle (hamburger) */
         .nav-toggle{display:none;width:42px;height:42px;border:0;background:transparent;cursor:pointer}
         .nav-toggle .bar{display:block;width:24px;height:2px;background:#fff;margin:5px auto;transition:transform .2s}
-        /* Mobile layout */
+
         @media (max-width: 900px){
             .nav-container{grid-template-columns:auto auto auto}
             .nav-toggle{display:inline-flex;align-items:center;justify-content:center}
@@ -41,30 +40,24 @@
             body.no-scroll{overflow:hidden}
         }
 
-        /* Buttons */
         .btn-primary{background:#fff;color:#000;padding:12px 22px;border-radius:999px;border:0;font-weight:700;text-decoration:none;display:inline-block}
         .btn-primary:hover{background:var(--brand);color:#fff;transform:translateY(-1px)}
 
-        /* Hero quick fallback bg overlay (in case style.css doesn’t) */
         .hero{position:relative}
         .hero::before{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.45),rgba(0,0,0,.35));pointer-events:none}
 
-        /* Search drawer */
         .search-drawer{position:fixed;left:50%;transform:translateX(-50%);top:72px;width:min(760px,94vw);background:#111;border:1px solid #222;border-radius:14px;display:none;z-index:1100}
         .search-drawer.open{display:block}
         .search-row{display:flex;gap:8px;padding:12px}
         .search-row input{flex:1;background:#0d0d0d;border:1px solid #222;color:#fff;border-radius:10px;padding:12px 14px;font-size:16px}
         .search-row button{border:0;border-radius:10px;padding:12px 16px;font-weight:600;cursor:pointer;background:var(--brand);color:#fff}
 
-        /* Toast */
         .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#111;border:1px solid #222;color:#fff;padding:12px 16px;border-radius:12px;opacity:0;pointer-events:none;transition:opacity .2s, transform .2s;z-index:1200}
         .toast.show{opacity:1;transform:translateX(-50%) translateY(-6px)}
 
-        /* Reveal animations */
         .reveal{opacity:0;transform:translateY(18px);transition:opacity .6s ease, transform .6s ease}
         .reveal.visible{opacity:1;transform:translateY(0)}
 
-        /* Back to Top */
         #backToTop{position:fixed;right:18px;bottom:18px;width:44px;height:44px;border-radius:50%;border:0;background:#1a1a1a;color:#fff;display:none;cursor:pointer;box-shadow:0 6px 18px rgba(0,0,0,.25)}
         #backToTop.show{display:inline-grid;place-items:center}
     </style>
@@ -78,7 +71,8 @@
         </button>
 
         <a class="logo" href="#home" aria-label="Home">
-            <img src="/images/logo.svg" alt="Restaurant logo" />
+            <!-- FIX: relative path (no leading slash) -->
+            <img src="images/logo.svg" alt="Restaurant logo" />
         </a>
 
         <nav id="primary-navigation" class="nav" role="navigation" aria-label="Main">
@@ -91,8 +85,9 @@
         </nav>
 
         <div class="nav-icons" aria-label="Quick actions">
-            <img id="openSearch" src="/images/Search Icon.svg" alt="Search" title="Search (/)">
-            <img src="/images/Group.svg" alt="Cart">
+            <!-- FIX: relative paths -->
+            <img id="openSearch" src="images/Search Icon.svg" alt="Search" title="Search (/)">
+            <img src="images/Group.svg" alt="Cart">
         </div>
     </div>
 </header>
@@ -106,7 +101,8 @@
 </div>
 
 <!-- Hero Section -->
-<section class="hero reveal" id="home" style="background:url('/images/image (6).png') center/cover no-repeat;">
+<!-- FIX: relative background path -->
+<section class="hero reveal" id="home" style="background:url('images/image (6).png') center/cover no-repeat;">
     <div class="hero-container">
         <div class="hero-content">
             <h1>Welcome!</h1>
@@ -126,7 +122,8 @@
             <p>It is a long established fact that a reader will be distracted by the readable content of a page when looking at its layout. The point of using Lorem Ipsum is that it has a more-or-less normal distribution of letters.</p>
         </div>
         <div class="about-image">
-            <img src="/images/Video.png" alt="Chef Cooking">
+            <!-- FIX: relative path -->
+            <img src="images/Video.png" alt="Chef Cooking">
         </div>
     </div>
 </section>
@@ -149,73 +146,75 @@
         <div class="menu-grid" id="menuGrid">
             <!-- Menu Card -->
             <article class="menu-item" data-category="bread">
-                <img src="/images/Image.png" alt="Naan Burger">
+                <!-- FIX: relative path -->
+                <img src="images/Image.png" alt="Naan Burger">
                 <h3>Naan Burger</h3>
                 <p>Lorem ipsum is simply dummy text of the printing and typesetting industry.</p>
                 <div class="menu-inner-cart">
                     <div class="price">$3.95</div>
                     <button class="inner-cart" data-item="Naan Burger" aria-label="Add Naan Burger to cart">
-                        <img src="/images/shopping-cart.png" alt="">
+                        <!-- FIX: relative path -->
+                        <img src="images/shopping-cart.png" alt="">
                     </button>
                 </div>
             </article>
 
             <article class="menu-item" data-category="rolls">
-                <img src="/images/image1.png" alt="Butter Chicken Fries">
+                <img src="images/image1.png" alt="Butter Chicken Fries">
                 <h3>Butter Chicken Fries</h3>
                 <p>Lorem ipsum is simply dummy text of the printing and typesetting industry.</p>
                 <div class="menu-inner-cart">
                     <div class="price">$3.95</div>
                     <button class="inner-cart" data-item="Butter Chicken Fries" aria-label="Add Butter Chicken Fries to cart">
-                        <img src="/images/shopping-cart.png" alt="">
+                        <img src="images/shopping-cart.png" alt="">
                     </button>
                 </div>
             </article>
 
             <article class="menu-item" data-category="bread">
-                <img src="/images/Image (2).png" alt="Chicken Sandwich">
+                <img src="images/Image (2).png" alt="Chicken Sandwich">
                 <h3>Chicken Sandwich</h3>
                 <p>Lorem ipsum is simply dummy text of the printing and typesetting industry.</p>
                 <div class="menu-inner-cart">
                     <div class="price">$3.95</div>
                     <button class="inner-cart" data-item="Chicken Sandwich" aria-label="Add Chicken Sandwich to cart">
-                        <img src="/images/shopping-cart.png" alt="">
+                        <img src="images/shopping-cart.png" alt="">
                     </button>
                 </div>
             </article>
 
             <article class="menu-item" data-category="cookies">
-                <img src="/images/Image (3).png" alt="Cheese Chicken Sticks">
+                <img src="images/Image (3).png" alt="Cheese Chicken Sticks">
                 <h3>Cheese Chicken Sticks</h3>
                 <p>Lorem ipsum is simply dummy text of the printing and typesetting industry.</p>
                 <div class="menu-inner-cart">
                     <div class="price">$3.95</div>
                     <button class="inner-cart" data-item="Cheese Chicken Sticks" aria-label="Add Cheese Chicken Sticks to cart">
-                        <img src="/images/shopping-cart.png" alt="">
+                        <img src="images/shopping-cart.png" alt="">
                     </button>
                 </div>
             </article>
 
             <article class="menu-item" data-category="cakes">
-                <img src="/images/Image (4).png" alt="3 Layer Burger">
+                <img src="images/Image (4).png" alt="3 Layer Burger">
                 <h3>3 Layer Burger</h3>
                 <p>Lorem ipsum is simply dummy text of the printing and typesetting industry.</p>
                 <div class="menu-inner-cart">
                     <div class="price">$3.95</div>
                     <button class="inner-cart" data-item="3 Layer Burger" aria-label="Add 3 Layer Burger to cart">
-                        <img src="/images/shopping-cart.png" alt="">
+                        <img src="images/shopping-cart.png" alt="">
                     </button>
                 </div>
             </article>
 
             <article class="menu-item" data-category="donut">
-                <img src="/images/Image (5).png" alt="Sandwich">
+                <img src="images/Image (5).png" alt="Sandwich">
                 <h3>Sandwich</h3>
                 <p>Lorem ipsum is simply dummy text of the printing and typesetting industry.</p>
                 <div class="menu-inner-cart">
                     <div class="price">$3.95</div>
                     <button class="inner-cart" data-item="Sandwich" aria-label="Add Sandwich to cart">
-                        <img src="/images/shopping-cart.png" alt="">
+                        <img src="images/shopping-cart.png" alt="">
                     </button>
                 </div>
             </article>
@@ -256,7 +255,8 @@
         <div class="testimonials-grid">
             <article class="testimonial-item">
                 <div class="testimonial-header">
-                    <img src="/images/Avater.png" alt="Client" class="testimonial-avatar">
+                    <!-- FIX: relative path -->
+                    <img src="images/Avater.png" alt="Client" class="testimonial-avatar">
                     <div class="testimonial-info">
                         <h4>Michal Gun</h4>
                         <h5>Head of sales at Tesla</h5>
@@ -268,7 +268,7 @@
 
             <article class="testimonial-item">
                 <div class="testimonial-header">
-                    <img src="/images/Avater (1).png" alt="Client" class="testimonial-avatar">
+                    <img src="images/Avater (1).png" alt="Client" class="testimonial-avatar">
                     <div class="testimonial-info">
                         <h4>Aleena White</h4>
                         <h5>Accountant of Ozone</h5>
@@ -280,7 +280,7 @@
 
             <article class="testimonial-item">
                 <div class="testimonial-header">
-                    <img src="/images/Avater (2).png" alt="Client" class="testimonial-avatar">
+                    <img src="images/Avater (2).png" alt="Client" class="testimonial-avatar">
                     <div class="testimonial-info">
                         <h4>Cries Lee</h4>
                         <h5>CEO Of Montee</h5>
@@ -355,16 +355,17 @@
             </div>
             <div class="footer-column">
                 <h3>We accept</h3>
-                <img src="/images/Frame.png" alt="Payment methods accepted">
+                <!-- FIX: relative path; ensure the actual filename matches your repo (e.g., Frame.png or Frame - Copy.png) -->
+                <img src="images/Frame.png" alt="Payment methods accepted">
             </div>
         </div>
 
         <div class="footer-bottom">
             <div class="social-icons" aria-label="Social links">
-                <img src="/images/Vector (1).png" alt="Facebook">
-                <img src="/images/vector2.png" alt="Twitter">
-                <img src="/images/vector3.png" alt="Instagram">
-                <img src="/images/vector4.png" alt="LinkedIn">
+                <img src="images/Vector (1).png" alt="Facebook">
+                <img src="images/vector2.png" alt="Twitter">
+                <img src="images/vector3.png" alt="Instagram">
+                <img src="images/vector4.png" alt="LinkedIn">
             </div>
             <div class="copyright">© 2024 Food — All rights reserved</div>
         </div>
@@ -374,7 +375,7 @@
 <!-- Back to Top -->
 <button id="backToTop" aria-label="Back to top" title="Back to top">↑</button>
 
-<!-- Cool JS Features -->
+<!-- JS Interactions -->
 <script>
     // ===== Helpers =====
     const $ = (sel, ctx = document) => ctx.querySelector(sel);
@@ -526,13 +527,19 @@
     // ===== See All button focuses grid and clears filters =====
     const seeAllBtn = $('#seeAllBtn');
     if (seeAllBtn){
-        seeAllBtn.addEventListener('click', (e) => {
+        seeAllBtn.addEventListener('click', () => {
             const allTab = tabs.find(t => t.dataset.filter === 'all');
             if (allTab) allTab.click();
-            // Brief highlight
             const grid = $('#menuGrid');
             if (grid) {
-                grid.animate([{ boxShadow:'0 0 0 rgba(0,0,0,0)' }, { boxShadow:'0 0 0 8px rgba(255,255,255,.08)' }, { boxShadow:'0 0 0 rgba(0,0,0,0)' }], { duration: 900 });
+                grid.animate(
+                    [
+                        { boxShadow:'0 0 0 rgba(0,0,0,0)' },
+                        { boxShadow:'0 0 0 8px rgba(255,255,255,.08)' },
+                        { boxShadow:'0 0 0 rgba(0,0,0,0)' }
+                    ],
+                    { duration: 900 }
+                );
             }
         });
     }
